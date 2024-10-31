@@ -1,0 +1,34 @@
+import arsenal.*
+import guerreros.*
+import zonas.*
+import caminos.*
+
+
+test "Un grupo no puede pasar por una zona por requerimiento de ítem."{
+    const grupoSinItem = [gandalf, frodo, legolas]
+    assert.that(not estemnet.puedeAtravesar(grupoSinItem))
+    }
+
+
+test "Un grupo no puede pasar por una zona por requerimiento de guerrero" {
+    const hobbitSinArma = new Hobbit (vida = 50, armas = [], items = []) 
+    const grupoSinArmas = [frodo,hobbitSinArma]
+    assert.that(not minasTirith.puedeAtravesar(grupoSinArmas))
+}
+
+
+test "Un grupo puede pasar por una zona" {
+    const grupoApto = [gandalf, gimli, aragorn]
+    assert.that(lebennin.puedeAtravesar(grupoApto))
+}
+
+test "Un grupo no puede atravesar un camino" {
+    const grupoNoApto = [gandalf, legolas]
+    assert.that(not caminoEjemplo.puedeAtravesar(grupoNoApto))
+}
+
+test "Un grupo puede atravesar un camino" {
+    const grupoApto = [frodo, gandalf, legolas]
+    const camino = new Camino (zonas = #{lebennin,belfalas})
+    assert.that(camino.puedeAtravesar(grupoApto))
+}

@@ -1,0 +1,69 @@
+import codigo.*
+
+describe "gandalf"{
+  test "con Gandalf con toda la vida y todas sus armas, su poder es 2800" {
+    assert.equals(2800, gandalf.poder())
+}
+  test "con Gandalf sin armas y con 80 de vida, su poder es 1200" {
+    gandalf.vida(80)
+    gandalf.armas(#{})
+    assert.equals(1200, gandalf.poder())
+  }
+
+  test "con Gandalf con 30 de vida, su báculo y su espada pero versión enana, su poder es 1650" {
+    gandalf.vida(30)
+    const baculo = new Baculo ()
+    const glamdring  = new EspadaEnana()
+    gandalf.armas(#{baculo, glamdring})
+    assert.equals(1650, gandalf.poder())
+  }
+
+  test "con Gandalf con 5 de vida y su báculo, su poder es 2300" {
+    gandalf.vida(5)
+    const baculo = new Baculo ()
+    gandalf.armas(#{baculo})
+    assert.equals(2300, gandalf.poder())
+  }
+}
+
+describe "Recorriendo la Tierra Media"{
+  test "Gandalf full vida y con sus armas puede atravesar Lebennin" {
+    assert.that(lebennin.puedeAtravesar(gandalf))
+  }
+
+  test "Gandalf sin armas y con 11 de vida no puede atravesar Lebennin" {
+    gandalf.vida(11)
+    gandalf.armas([])
+    assert.notThat(lebennin.puedeAtravesar(gandalf))
+  }
+
+  test"Gandalf sin armas y con 11 de vida no puede atravesar Minas Tirith" {
+    gandalf.vida(11)
+    gandalf.armas([])
+    assert.notThat(minasTirith.puedeAtravesar(gandalf))
+  }
+
+  test"Gandalf full vida y con sus armas puede atravesar el camino compuesto por Lebennin y Minas Tirith" {    
+    const caminoGondor = new Camino ()
+    caminoGondor.zonas([lebennin, minasTirith])
+    assert.that(caminoGondor.puedeAtravesar(gandalf))
+  }
+
+  test"Gandalf full vida y con sus armas atraviesa el camino compuesto por Lebennin y Minas Tirith, vida de Gandalf es 90" {
+    const caminoGondor = new Camino()
+    caminoGondor.zonas([lebennin, minasTirith])
+    caminoGondor.efecto(gandalf)
+    assert.equals(90, gandalf.vida())
+  }
+}
+
+describe "Tom"{
+  test"Tom puede atravesar Lebennin" {    
+    assert.that(tomBombadil.puedeAtravesar(lebennin))
+  }
+
+  test"Tom atraviesa el camino que pasa por Gondor antes mencionado" {    
+    tomBombadil.efecto(lebennin)
+    assert.equals(100, tomBombadil.vida())
+  }
+}

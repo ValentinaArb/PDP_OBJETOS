@@ -1,0 +1,57 @@
+import guerreros.*
+import arsenal.*
+
+test "Frodo es hobbit con 50 de vida, Espada elfica con multiplicador de 8 y sin items, tiene 290 de poder" {
+  assert.equals(290, frodo.poder())
+}
+
+test "Gimli es enano con 75 de vida, dos hachas de 70 de largo y 5 kg la hoja, factor de poder 3, tiene 2175 de poder" {
+  assert.equals(2175, gimli.poder())
+}
+
+test "Legolas es elfo con 80 de vida, un arco de longitud 110 y una espada elfica con multiplicador de 12, 1 de destreza, tiene 2480 de poder" {
+  assert.equals(2480, legolas.poder())
+}
+
+test "Aragorn es humano con 85 de vida, una espada de origen elfico con multiplicador de 18 y una daga de valor 10 de origen enano, con limitador de poder de 20, tiene 2720 de poder" {
+  assert.equals(2720, aragorn.poder())
+}
+
+test "Gandalf es maiar con 100 de vida, una espada de origen elfico con multiplicador de 10 y un baculo de 400 de poder, tiene 2900 de poder" {
+  assert.equals(2900, gandalf.poder())
+}
+
+test "Gandalf es maiar con 9 de vida, una espada de origen elfico con multiplicador de 10 y un baculo de 400 de poder, tiene 4100 de poder" {
+  const gandalfPrueba = new Maiar(vida = 9, armas = [baculoGandalf, glamdring])
+  assert.equals(4100, gandalfPrueba.poder())
+}
+
+test "Legolas es elfo con 80 de vida, un arco de longitud 110 y una espada elfica con multiplicador de 12, 1.5 de destreza, tiene 2880 de poder" {
+  const legolasMasDestreza = new Elfo (vida = 80, destrezaPropia = 1.5, armas = [arcoLegolas, espadaLegolas])
+  assert.equals(2880, legolasMasDestreza.poder())
+}
+
+//puse los otros test q eran de la 1ra entrega. no se si hacen falta, digan q opinan
+/* 
+describe "gandalf"{
+  test "con Gandalf sin armas y con 80 de vida, su poder es 1200" {
+    gandalf.vida(80)
+    gandalf.armas(#{})
+    assert.equals(1200, gandalf.poder())
+  }
+
+  test "con Gandalf con 30 de vida, su báculo y su espada pero versión enana, su poder es 1650" {
+    gandalf.vida(30)
+    const baculo = new Baculo ()
+    const glamdring  = new EspadaEnana()
+    gandalf.armas(#{baculo, glamdring})
+    assert.equals(1650, gandalf.poder())
+  }
+
+  test "con Gandalf con 5 de vida y su báculo, su poder es 2300" {
+    gandalf.vida(5)
+    const baculo = new Baculo ()
+    gandalf.armas(#{baculo})
+    assert.equals(2300, gandalf.poder())
+  }
+} */

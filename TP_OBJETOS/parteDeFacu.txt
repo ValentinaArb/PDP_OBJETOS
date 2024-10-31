@@ -1,0 +1,97 @@
+object lebennin {
+
+  method puedeAtravesar(guerrero){
+    return guerrero.poder() > 1500
+  }
+
+  method efecto(guerrero){
+  }
+}
+
+object minasTirith {
+
+  method puedeAtravesar(guerrero){
+    return guerrero.armas().size() > 0
+  }
+
+
+  method efecto(guerrero){
+    const vida = guerrero.vida()
+    guerrero.vida(vida - 10)
+  }
+
+}
+
+object lossarnach {
+  method puedeAtravesar(guerrero) {
+    return true
+  }
+
+  method efecto(guerrero) {
+    const vida = guerrero.vida()
+    guerrero.vida(vida + 1)
+  }
+}
+
+class Camino {
+  var property zonas = []
+
+  method efecto(guerrero) {
+    return zonas.every { zona => zona.puedeAtravesar(guerrero) }
+  }
+
+  method atravesar(guerrero) {
+    zonas.forEach { zona =>
+    if (!zona.puedeAtravesar(guerrero)) {
+      throw new DomainException(message="El guerrero no puede atravesar la zona " + zona)
+    }
+    zona.aplicarConsecuencia(guerrero)
+  }
+  }
+}
+describe "Recorriendo la Tierra Media"{
+  test "Gandalf full vida y con sus armas puede atravesar Lebennin" {
+    gandalf.vida(100)
+    assert.that(lebennin.puedeAtravesar(gandalf))
+  }
+
+
+
+
+
+
+
+////////////TESTS////////////////
+
+
+
+
+
+  test "Gandalf sin armas y con 11 de vida no puede atravesar Lebennin" {
+    gandalf.vida(11)
+    gandalf.armas([])
+    assert.notThat(lebennin.puedeAtravesar(gandalf))
+  }
+
+  test"Gandalf sin armas y con 11 de vida no puede atravesar Minas Tirith" {
+    gandalf.vida(11)
+    gandalf.armas([])
+    assert.notThat(minasTirith.puedeAtravesar(gandalf))
+  }
+
+  //no funcionan:
+  test"Gandalf full vida y con sus armas puede atravesar el camino compuesto por Lebennin y Minas Tirith" {
+    gandalf.vida(100)
+    const caminoGondor = new Camino ()
+    caminoGondor.zonas([lebennin, minasTirith])
+    assert.that(caminoGondor.efecto(gandalf))
+  }
+
+  test"Gandalf full vida y con sus armas atraviesa el camino compuesto por Lebennin y Minas Tirith, vida de Gandalf es 90" {
+    gandalf.vida(100)
+    const caminoGondor = new Camino()
+    caminoGondor.zonas([lebennin, minasTirith])
+    caminoGondor.atravesar(gandalf)
+    assert.equals(90, gandalf.vida())
+  }
+}

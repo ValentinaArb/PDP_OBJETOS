@@ -1,0 +1,30 @@
+import arsenal.*
+
+test "Espada con multiplicador de 15 y de origen Enano, tiene 300 de poder" {
+    const espada = new Espada (multiplicador=15, origen=enano)
+    assert.equals(300, espada.poder())
+    }
+
+test "Daga con multiplicador de 15 y origen Enano, tiene 150 de poder " {
+    const daga = new Daga (multiplicador=15, origen=enano)
+    assert.equals(150, daga.poder())
+    }
+test "Hacha con mango de 50 cm, con una hoja de 5kg, tiene 250 de poder" {
+    const hacha = new Hacha (longitudMango=50, pesoHoja=5)
+    assert.equals(250, hacha.poder())
+    }
+
+describe "Arco" { //capaz esta de mas separarlos ...
+    test "Arco con longitud de 110cm, tiene 440 de poder" {
+        const arco = new Arco (longitud=110)
+        assert.equals(440, arco.poder())
+    }
+
+    test "Mismo arco que antes con tension a 35kg, tiene 385 de poder. " {
+        propiedadesArco.tension(35)
+        const arcoModificado = new Arco (longitud=110)
+        assert.equals(385, arcoModificado.poder())
+ }
+    }
+        
+
