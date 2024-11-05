@@ -6,7 +6,7 @@ class Escapista{
   method actualizar(nuevaMaestria) = true 
 
   var property salasEscapadas = []
-  var saldo
+  var property saldo  
 
   method hizoMuchasSalas() = self.salasEscapadas().size() > 6
 
@@ -21,6 +21,8 @@ class Escapista{
   }
 
   method salasLogradas() = self.salasEscapadas().asSet()
+
+  method puedePagar(cantidad) = cantidad <= saldo 
 }
 
 class EscapistaAmateur inherits Escapista{
