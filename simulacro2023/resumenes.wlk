@@ -49,8 +49,7 @@ class ResumenAsiNomas inherits Resumen{
 class Seccion{
     const property duracion
     const property speech
-    
-    
+        
     method esMusicalizada() = false
     method esReferencial () = false
 }
