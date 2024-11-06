@@ -1,38 +1,40 @@
 import salas.*
 class Escapista{
   var maestria
-  method maestria() = maestria
+  var saldo
+  var salasEscapadas = []
 
-  method actualizar(nuevaMaestria) = true 
+  method puedeSalir(sala) = maestria.puedeSalir(sala,self)
 
-  var property salasEscapadas = []
-  var property saldo  
-
-  method hizoMuchasSalas() = self.salasEscapadas().size() > 6
-
-  method condicionAmateur(sala) = !sala.esDificil() && self.hizoMuchasSalas()
-
-  method puedeSalir(sala)
+  method hizoMuchasSalas() = salasEscapadas.size() >= 6
 
   method subirNivelMaestria(){
-    if(self.hizoMuchasSalas() && self.maestria() == "amateur"){
-      self.actualizar("profesional")
+    if(self.hizoMuchasSalas()){
+      maestria = maestria.siguienteNivel()
     }
   }
 
-  method salasLogradas() = self.salasEscapadas().asSet()
+  method registrarSala(sala) = salasEscapadas.add(sala)
 
-  method puedePagar(cantidad) = cantidad <= saldo 
+  method salasLogradas() = salasEscapadas.map { unaSala => unaSala.nombre() }.withoutDuplicates()
+
+  method pagar(cantidad) {
+    saldo -= cantidad
+  }  
+
+  method puedePagar(cantidad) = cantidad <= saldo
 }
 
-class EscapistaAmateur inherits Escapista{
-  override method maestria() = "amateur"
+object amateur{
+  method condicionAmateur(sala,escapista) = !sala.esDificil() && escapista.hizoMuchasSalas()
+  
+  method puedeSalir(sala,escapista) = self.condicionAmateur(sala,escapista)
 
-  override method puedeSalir(sala) = self.condicionAmateur(sala)
+  method siguienteNivel() = profesional
 }
 
-class EscapistaProfesional inherits Escapista{
-  override method maestria() = "profesional"
+object profesional{
+  method puedeSalir(sala,escapista) = true
 
-  override method puedeSalir(sala) = true
+  method siguienteNivel() = self
 }

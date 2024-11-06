@@ -1,27 +1,24 @@
 import escapistas.*
 import salas.*
 class Grupo{
-    const property grupo = #{}
+    const grupo = #{}
 
-    method cantidadEscapistas() = self.grupo().size()
+    method cantidadEscapistas() = grupo.size()
 
-    method puedeSalir() = grupo.any{integrante => integrante.puedeSalir()}
+    method puedeSalir(sala) = grupo.any{integrante => integrante.puedeSalir(sala)}
     
-    method ingresar(sala){
-        if(self.puedeSalir()){
-            self.escapar(sala)
-        }
+    method escapar(sala) {  
+        self.pagar(sala)   
+        grupo.forEach{escapista => escapista.registrarSala(sala)}
     }
-
-    method escapar(sala) {      
-        grupo.forEach{escapista => escapista.salasEscapadas().add(sala)}
-    }
-    
+     
     method pagar(sala){
         const precioSala = sala.precio() 
-        self.ingresar(sala)
         if(self.puedePagar(sala)){
-            self.restarGastos(precioSala)
+            grupo.forEach{miembro => miembro.pagar(self.montoPorPersonaPara(sala))}
+        }
+        else{
+            self.error("No tiene dinero suficiente")
         }
     }
 
@@ -30,14 +27,13 @@ class Grupo{
         return self.dividirGastos(precioSala) || self.cubrirPersonas(precioSala)
     }
    
-    method restarGastos(precioSala){
-        grupo.forEach{escapista => escapista.saldo() - precioSala/self.cantidadEscapistas()} //logica repe precioSala/self.cantidadEscapistas()
-    }
+    method dividirGastos(sala) = grupo.all{escapista => escapista.puedePagar(self.montoPorPersonaPara(sala))}
 
-    method dividirGastos(precioSala) = grupo.forEach{escapista => escapista.puedePagar(precioSala/self.cantidadEscapistas())}
+    method adinerados(sala) = grupo.filter{escapista => escapista.puedePagar(self.montoPorPersonaPara(sala))}
 
-    method cubrirPersonas(precioSala) {
-        const puedenPagarlo = grupo.filter{escapista => escapista.puedePagar(precioSala/self.cantidadEscapistas())}
-        return puedenPagarlo.saldo().sum() >= precioSala
-    }
+    method plataAdinerados(sala) = self.adinerados(sala).sum{adinerado => adinerado.saldo()}
+
+    method cubrirPersonas(sala) =  self.plataAdinerados(sala) >= sala.precio()
+
+    method montoPorPersonaPara(sala) = sala.precio() / self.cantidadEscapistas()
 }
