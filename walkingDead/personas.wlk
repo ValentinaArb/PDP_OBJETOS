@@ -80,3 +80,5 @@ class Predadores inherits Sobreviviente{
     super()/2 + self.poderCorrosivoEsclavos()
   }
 }
+
+ 
