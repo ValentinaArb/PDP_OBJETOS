@@ -1,8 +1,8 @@
 object islaPajaros{
   const pajarosIsla = #{}
   const fuertes = pajarosIsla.filter{pajaro => pajaro.esFuerte()}
-  method fuerzaIsla() = fuertes.sum{pajaroFuerte => pajaroFuerte.fuerza()}
 
+  method fuerzaIsla() = fuertes.sum{pajaroFuerte => pajaroFuerte.fuerza()}
   method atacarIslaCerdito(){
     const obstaculo = islaCerdito.obstaculos.min{obstaculo => obstaculo.distancia()}
     const pajaroElegido = pajarosIsla.anyOne()
@@ -50,7 +50,6 @@ object bomb inherits PajaroComun{
   override method fuerza() = self.fuerza().min(limite)
   override method enojo(){}
 }
-
 object chuck inherits PajaroComun{
   var velocidad = 0
   override method fuerza() = 150 + (5 * (velocidad - 80).max(0))
@@ -66,10 +65,12 @@ object matilda inherits PajaroComun{
   var huevos = []
   override method fuerza() = super() + self.fuerzaHuevos()
   override method enojo(){
+    self.ponerHuevo(2)
   }
   method fuerzaHuevos() = huevos.sum{huevo => huevo.fuerza()}
-  method ponerHuevo(peso){
-    huevos.add(peso) //deberia agregarse un huevo pero no se bien how
+  method ponerHuevo(pesoHuevo){
+    const nuevoHuevo = new Huevo(peso = pesoHuevo)
+		huevos.add(nuevoHuevo)
   }
 }
 
@@ -107,7 +108,7 @@ object islaCerdito{
 }
 
 class Obstaculo{
-  method distancia() = 10 // no se como poner la distancia, no la espeficica nunca
+  method distancia() = 10 // la distancia tmb tendría que ser abstracta  y que cada obstaculo contenga su distancia, como la resistencia
   method resistencia()
 }
 class Pared inherits Obstaculo{
