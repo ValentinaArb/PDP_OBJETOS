@@ -12,13 +12,11 @@ class Caminante{
 
 object puntosDeAtaque{
   var property puntos = 2 
-} 
+}
 
 class Sobreviviente{
   var resistencia
-  var energia
   var property carisma
-  var cantidadVecesInfectado = 0
   var estado = Saludable
   const puntosBaseSobreviviente
 
@@ -64,7 +62,7 @@ class Predadores inherits Sobreviviente{
   const caminantesEsclavizados = #{}
   
   override method atacar(caminante){
-    //super() no entiendo porq me tira error
+    super(caminante)
     self.esclavizar(caminante)
   }
 

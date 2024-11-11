@@ -19,7 +19,6 @@ class Jugador {
 }
 
 class Posicion {
-
 	var partidos = 0
 	var goles = 0
 
@@ -30,7 +29,6 @@ class Posicion {
 	}
 
 	method esEstrella(jugador)
-
 	method habilidad()
 
 }

@@ -17,6 +17,7 @@ class Arrebatado inherits Sobreviviente{
 }
 
 class Infectado inherits Sobreviviente{
+  var cantidadVecesInfectado = 0
   override method efectoAtacar(){
     cantidadVecesInfectado += 1
     resistencia -= puntosDeAtaque.puntos() - 3

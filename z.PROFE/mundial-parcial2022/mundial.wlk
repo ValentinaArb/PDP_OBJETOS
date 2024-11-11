@@ -1,201 +1,272 @@
-// Artistas
-class Artista {
-	var groupies = 0
-	
-	method calidad() {
-		return self.calidadEstilos() + self.calidadArtista()
+class Jugador {
+
+	const property nombre
+	var edad
+	var property posicion
+	var peso
+	var property altura
+
+	method esEstrella() = posicion.esEstrella(self)
+
+	method habilidad() = posicion.habilidad()
+
+	method jugar() {
+		posicion.jugar()
 	}
-	
-	method calidadEstilos() = self.estilos().size() * 5
-	
-	method estilos()
-	method calidadArtista()
-	
-	method sumarGroupies(cantidad) {
-		groupies += cantidad
+
+	method mideMasDe(metros) = altura > metros
+
+}
+
+class Posicion {
+
+	var partidos = 0
+	var goles = 0
+
+	method jugoMasDe(cantidadPartidos) = partidos > cantidadPartidos
+
+	method jugar() {
+		partidos += 1
 	}
-	
-	method estaPegado() = groupies > 20000
+
+	method esEstrella(jugador)
+
+	method habilidad()
+
 }
 
-class Musico inherits Artista {
-	var instrumento
-	const property estilos = #{}
-	
-	method tieneEstilo(estilo) = estilos.contains(estilo)
-	
-	method aprenderEstilo(estilo) {
-		estilos.add(estilo)
+class Arquero inherits Posicion {
+
+	var golesRecibidos = 0
+
+	override method esEstrella(jugador) {
+		return (self.jugoMasDe(100) && self.promedioRecibidosBajo()) || jugador.mideMasDe(1.9)
 	}
-	
-	override method calidadArtista() {
-		return instrumento.calidad()
+
+	method promedioRecibidosBajo() = golesRecibidos / partidos < 0.8
+
+	override method habilidad() = partidos * 2 + goles * 500 - golesRecibidos
+
+}
+
+class Defensor inherits Posicion {
+
+	var amarillas = 0
+	var rojas = 0
+
+	override method esEstrella(jugador) {
+		return self.jugoMasDe(149) && self.promedioAmarillasBajo() && self.tieneMinimoDeRojas()
 	}
-	
-	
-	method esVocalista() = instrumento == voz
+
+	method promedioAmarillasBajo() = amarillas / partidos < 0.5
+
+	method tieneMinimoDeRojas() = rojas >= 5
+
+	override method habilidad() = partidos * 3 + goles * 5 + amarillas - rojas * 10
+
 }
 
-object amplificadorMarshall {
-	method potencia() = 7
-}
+class Mediocampista inherits Posicion {
 
-class Instrumento {
-	var calidadBase
-	
-	method calidad(musico) = calidadBase + self.calidadInstrumento(musico)
-	
-	method calidadInstrumento(musico)
-}
+	var asistencias = 0
+	var jugoConSeleccion = false
 
-class GuitarraElectrica inherits Instrumento(calidadBase=15){
-	const amplificador
-	
-	override method calidadInstrumento(musico) = amplificador.potencia()
-}
-
-class GuitarraCriolla inherits Instrumento(calidadBase=10){
-	var cuerdasSanas
-	
-	override method calidadInstrumento(musico) = cuerdasSanas
-} 
-
-class InstrumentoParaEstilo inherits Instrumento{
-	method estiloNecesario()
-	method extraPorEstilo()
-	
-	override method calidadInstrumento(musico) {
-		if(musico.tieneEstilo(self.estiloNecesario())) {
-			return self.extraPorEstilo()
-		}
-		return 0
+	override method esEstrella(jugador) {
+		return (self.jugoMasDe(250) && self.tieneMinimoDeGoles() && self.tieneMinimoDeAsistencias() && jugoConSeleccion) || self.nombreTerminaEnInho(jugador)
 	}
-}
 
-class Bajo inherits InstrumentoParaEstilo(calidadBase=5){
-	var color
-	
-	override method estiloNecesario() = "metal"
-	
-	override method extraPorEstilo() {
-		if (color == "rojo"){
-			return 7
+	method tieneMinimoDeGoles() = goles >= 20
+
+	method tieneMinimoDeAsistencias() = asistencias >= 80
+
+	method nombreTerminaEnInho(jugador) = jugador.nombre().endsWith("inho")
+
+	override method habilidad() = partidos + goles * 2 + asistencias * 3 + self.puntosSeleccion()
+
+	method puntosSeleccion() {
+		if (jugoConSeleccion) {
+			return 100
 		} else {
-			return 2
+			return 0
 		}
 	}
+
+	override method jugar() {
+		super()
+		jugoConSeleccion = true
+	}
+
 }
 
-object bateria inherits InstrumentoParaEstilo(calidadBase=10){
-	override method estiloNecesario() = "rock"
-	override method extraPorEstilo() = 10
+object delantero {
+
+	method esEstrella(jugador) = true
+
+	method habilidad() = 1500
+
 }
 
+class Equipo {
 
-object voz inherits Instrumento(calidadBase=16){
-	method cambiarCalidad(nuevaCalidad){
-		calidadBase = nuevaCalidad
+	const jugadores = #{}
+	var property victorias = 0
+	var property derrotas = 0
+	var property empates = 0
+
+	method cantidadPermitidaDeEstrellas()
+
+	method agregarJugador(jugador) {
+		self.chequearQueSePuedeAgregar(jugador)
+		jugadores.add(jugador)
 	}
-	
-	override method calidadInstrumento(musico) = 0
+
+	method chequearQueSePuedeAgregar(jugador) {
+		if (self.estaCompleto()) {
+			self.error("¡El equipo está completo, ya son 11!")
+		}
+		if (jugador.esEstrella() && self.completoDeEstrellas()) {
+			self.error("Ya hay muchas estrellas, no se puede agregar otra")
+		}
+	}
+
+	method estaCompleto() = jugadores.size() == 11
+
+	method completoDeEstrellas() = self.cantidadEstrellas() >= self.cantidadPermitidaDeEstrellas()
+
+	method cantidadEstrellas() = jugadores.filter{ jugador => jugador.esEstrella() }.size()
+
+	method habilidad() = jugadores.sum{ jugador => jugador.habilidad() }
+
+	method jugar() {
+		jugadores.each{ jugador => jugador.jugar()}
+	}
+
+	method ganar() {
+		victorias += 1
+	}
+
+	method perder() {
+		derrotas += 1
+	}
+
+	method empatar() {
+		empates += 1
+	}
+
+	method puntos() = victorias * 3 + empates
+
+	method cumplioSuMinimo() = self.puntos() >= self.puntosEsperados()
+
+	method puntosEsperados()
+
 }
 
+class EquipoPro inherits Equipo {
 
-const taylor = new Musico(instrumento=voz, estilos=#{"pop", "rock", "country"})
-const maikel = new Musico(instrumento=voz, estilos=#{"pop", "soul"})
-const guitarraRiorio = new GuitarraElectrica(amplificador=amplificadorMarshall)
-const riorio = new Musico(instrumento=guitarraRiorio, estilos=#{"metal", "heavy metal"})
-const hellMusic = new Musico(instrumento=voz, estilos=#{"metal", "death metal"})
-const truquillo = new Musico(instrumento=new Bajo(color="rojo"), estilos=#{"rock", "metal"})
-const emiliaViernes = new Musico(instrumento=voz, estilos=#{"cumbia uruguaya", "pop"})
-const rengoEstar = new Musico(instrumento=bateria, estilos=#{"rock", "pop"})
+	override method cantidadPermitidaDeEstrellas() = 9
 
+	override method puntosEsperados() {
+		if (self.tieneAMessi()) {
+			return 18
+		} else {
+			return 12
+		}
+	}
 
-class Banda inherits Artista {
-	const integrantes = #{}
-	
-	method agregarIntegrante(integrante) {
-		self.validarNuevoIntegrante(integrante)
-		integrantes.add(integrante)
-	}
-	
-	method validarNuevoIntegrante(integrante) {
-		if (!integrantes.isEmpty()) {
-			self.validarUnSoloVocalista(integrante)
-			self.validarComparteEstilo(integrante)
-			self.validarCantidadIntegrantes()	
-		}
-	}
-	
-	method validarUnSoloVocalista(integrante) {
-		if (integrante.esVocalista() && self.tenemosVocalista()) {
-			self.error("Ya tenemos un vocalista!")
-		}
-	}
-	
-	method tenemosVocalista() = integrantes.any {integrante => integrante.esVocalista()}
-	
-	method validarComparteEstilo(integrante){
-		if (not self.comparteEstilosConTodos(integrante)) {
-			self.error("No tenemos un estilo en común")
-		}
-	}
-	
-	method comparteEstilosConTodos(integrante) {
-		return self.estilos().any({estilo => integrante.tieneEstilo(estilo)})
-	}
-	
-	override method estilos() {
-		if (integrantes.isEmpty()) {
-			return []
-		}
-		const estilos = integrantes.any().estilos()
-		return integrantes.fold(
-			estilos, {estilosEnComun, integrante => integrante.estilos().intersection(estilosEnComun)}
-		)
-	}
-	
-	method validarCantidadIntegrantes() {
-		if (integrantes.size() >= 4) {
-			self.error("Ya tenemos muchos integrantes, admitimos 4")
-		}
-	}
-	
-	override method calidadArtista() {
-		return self.elMejor().calidad() + self.calidadIntegrantes()
-	}
-	
-	method calidadIntegrantes() {
-		return integrantes.size() * 2
-	}
-	
-	method elMejor() {
-		return integrantes.max {integrante => integrante.calidad()}
-	}
-	
-	override method sumarGroupies(cantidad) {
-		super(cantidad)
-		self.elMejor().sumarGroupies(cantidad / 2)
-	}
+	method tieneAMessi() = jugadores.any{ jugador => jugador.nombre() == "Messi" }
+
 }
 
-class Recital {
-	const artista
-	const duracion
-	const participantes
-	
-	method ejecutar() {
-		artista.sumarGroupies(self.porcentajeCaptado() * participantes)
-	}
-	
-	method porcentajeCaptado() {
-		return (artista.calidad() - self.perdidaPorDuracion()).min(100) / 100
-	}
-	
-	method perdidaPorDuracion() {
-		if (duracion < 60) {
-			return 3
+class EquipoMedioPelo inherits Equipo {
+
+	override method cantidadPermitidaDeEstrellas() = 3
+
+	override method puntosEsperados() = self.cantidadEstrellas()
+
+}
+
+object brasil inherits Equipo {
+
+	override method cantidadPermitidaDeEstrellas() = 11
+
+	override method puntosEsperados() = 21
+
+}
+
+class Partido {
+
+	const local
+	const visitante
+
+	method jugar() {
+		self.chequearEstanCompletos()
+		if (self.ganaLocal()) {
+			self.gano(local, visitante)
+		} else if (self.empatan()) {
+			self.empataron()
+		} else {
+			self.gano(visitante, local)
 		}
-		return 0
+		local.jugar()
+		visitante.jugar()
 	}
+
+	method chequearEstanCompletos() {
+		if (not (local.estaCompleto() && visitante.estaCompleto())) {
+			self.error('Los equipos no están completos, ambos tienen que tener 11 jugadores')
+		}
+	}
+
+	method gano(ganador, perdedor) {
+		ganador.ganar()
+		perdedor.perder()
+	}
+
+	method empataron() {
+		local.empatar()
+		visitante.empatar()
+	}
+
+	method ganaLocal() = self.puntosLocal() >= self.puntosVisitante()
+
+	method empatan() = self.puntosLocal() == self.puntosVisitante()
+
+	method puntosLocal() {
+		return self.puntos(local, visitante) + self.puntosPorLocalia()
+	}
+
+	method puntosVisitante() {
+		return self.puntos(visitante, local)
+	}
+
+	method puntos(equipo, rival) {
+		return self.puntosPorEstrellas(equipo) + self.puntosSiEsMejor(equipo, rival)
+	}
+
+	method puntosPorEstrellas(equipo) = equipo.cantidadEstrellas()
+
+	method puntosSiEsMejor(equipo, rival) {
+		if (equipo.habilidad() > rival.habilidad()) {
+			return 5
+		} else {
+			return 0
+		}
+	}
+
+	method puntosPorLocalia() = 1
+
+}
+
+object mundial {
+
+	const equipos = #{}
+
+	method agregarEquipo(equipo) {
+		equipos.add(equipo)
+	}
+
+	method huboBatacazo() = equipos.any{ equipo => equipo.cantidadEstrellas() < 2 && equipo.puntos() > 0 }
+
+	method estamosBien() = equipos.all{ equipo => equipo.cumplioSuMinimo() }
+
 }
