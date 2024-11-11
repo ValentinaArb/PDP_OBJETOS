@@ -1,4 +1,4 @@
-object isla{
+object islaPajaros{
   const pajarosIsla = #{}
   const fuertes = pajarosIsla.filter{pajaro => pajaro.esFuerte()}
   method fuerzaIsla() = fuertes.sum{pajaroFuerte => pajaroFuerte.fuerza()}
@@ -79,18 +79,18 @@ class Huevo{
 }
 
 class Evento{
-  method manejoDeIra() = isla.pajarosIsla.forEach{pajaro => pajaro.tranquilizar()}
+  method manejoDeIra() = islaPajaros.pajarosIsla.forEach{pajaro => pajaro.tranquilizar()}
 
   method invasionCerditos(cantidad){
     const vecesARepetir = (cantidad/100)
-    vecesARepetir.times { index => isla.pajarosIsla.forEach{pajaro => pajaro.enojar()}} 
+    vecesARepetir.times { index => islaPajaros.pajarosIsla.forEach{pajaro => pajaro.enojar()}} 
   }
 
   method fiestaSorpresa(){
     //homenajeados?
   }
 
-  method aplicarEvento(evento) = isla.pajarosIsla.forEach{pajaro => pajaro.evento()}
+  method aplicarEvento(evento) = islaPajaros.pajarosIsla.forEach{pajaro => pajaro.evento()}
 
   method serieDeEventos(){
     const eventos = []    
