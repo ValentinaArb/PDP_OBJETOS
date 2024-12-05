@@ -3,7 +3,7 @@ import gameflix.*
 
 class Usuarios{
     var plata
-    var property suscripcion = Premium
+    var property suscripcion = premium
     var humor
     method humor() = humor.max(0)
     var horasJugadas
@@ -16,7 +16,7 @@ class Usuarios{
         if(plata > cantidad){
             plata -= cantidad
         }else{
-            self.actualizar(Prueba)
+            self.actualizar(prueba)
             throw new NoHayPlataSuficiente(message= "No tenes plata suficiente")
         }
     }
