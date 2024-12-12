@@ -12,7 +12,7 @@ object profe {
 } 
 
 class Jugador{
-    var vida 
+    var vida = 100
     var skin
     const items = []
     const property arma
@@ -27,11 +27,11 @@ class Jugador{
     method sinVida() = vida == 0
 
     method aumentarVida(cantidad){
-        return (vida + cantidad).max(100) // +=
+        vida = (vida + cantidad).max(100)
     }
 
     method decrementarVida(cantidad){
-        return (vida - cantidad).min(0) // -=
+        vida = (vida - cantidad).min(0)
     }
 
     method danioArma() = arma.danio()
@@ -41,6 +41,8 @@ class Jugador{
     method modificarPersonalidad(nuevaPersonalidad){
         personalidad = nuevaPersonalidad
     }
+
+    method tieneSkin(skinComparar) = skin == skinComparar
 
     method danioAtaque() = personalidad.danioAtaque(self)
 
@@ -64,9 +66,9 @@ class Jugador{
 
 }
 
-const alfonso = new Jugador (personalidad = Estandar, arma = escopeta, items = [], vida = 100, skin = "Spider Man")
-const brisa = new Jugador (personalidad = Camper, arma = rifle, items = [silenciador,mini,mini,botiquin], vida = 100, skin = "Lara Croft")
-const changuito = new Jugador (personalidad = NinioRata, arma = cuchillo, items = [granada,granada,granada], vida = 100, skin = "Maradona")
+const alfonso = new Jugador (personalidad = estandar, arma = escopeta, items = [], vida = 100, skin = "Spider Man")
+const brisa = new Jugador (personalidad = camper, arma = rifle, items = [silenciador,mini,mini,botiquin], vida = 100, skin = "Lara Croft")
+const changuito = new Jugador (personalidad = ninioRata, arma = cuchillo, items = [granada,granada,granada], vida = 100, skin = "Maradona")
 const deLaCryuff = new Jugador (personalidad = Arriesgado, arma = pistola, items = [balasDeFuego,silenciador,botiquin], vida = 100, skin = "Rubius")
 
 
@@ -88,16 +90,17 @@ object cuchillo inherits Arma (danioBase = 10){
 
 class Item{
     method esCurador() = false
+    method consumir(jugador,rival)
 }
 
 class ItemCurador inherits Item{
     const cantidad
     override method esCurador() = true
-    method consumir(jugador) = jugador.aumentarVida(cantidad)
+    override method consumir(jugador,rival) = jugador.aumentarVida(cantidad)
 }
 class ItemPotenciador inherits Item{
     const cantidad
-    method consumir(jugador) = jugador.arma().aumentarDanio(cantidad)
+    override method consumir(jugador,rival) = jugador.arma().aumentarDanio(cantidad)
 }
 
 const botiquin = new ItemCurador(cantidad = 100)
@@ -106,35 +109,29 @@ const balasDeFuego = new ItemPotenciador(cantidad = 5)
 const silenciador = new ItemPotenciador(cantidad = 3)
 
 object granada inherits Item{
-    method consumir(jugador){
-        jugador.decrementarVida(30)
+    override method consumir(jugador,rival){
+        rival.decrementarVida(30)
     }
 }
 
 class Personalidad{
-    method danioAtaque(jugador)
+    var extra
+    method danioAtaque(jugador) = jugador.danioArma() + jugador.danioArma() * extra
 }
-class Estandar inherits Personalidad{
-    override method danioAtaque(jugador) = jugador.danioArma()
-}
+const estandar = new Personalidad (extra = 0)
+const camper = new Personalidad (extra = 0)
+const ninioRata = new Personalidad (extra = -0.2)
+
 class Arriesgado inherits Personalidad{
-    var extra = 0
-    override method danioAtaque(jugador){
+    method agregar(jugador){
         if(jugador.vidaMenorQue(10)){
             extra = 1
         }else if(jugador.vidaMenorQue(50)){
             extra = 0.25
+        }else{
+            extra = 0
         }
-        jugador.danioArma() + extra * jugador.danioArma()
     }
-}
-
-class Camper inherits Personalidad{
-    override method danioAtaque(jugador) = jugador.danioArma()
-}
-
-class NinioRata inherits Personalidad{
-    override method danioAtaque(jugador) = jugador.danioArma() - 0.2 * jugador.danioArma()
 }
 
 class Partida{
@@ -172,16 +169,16 @@ class Partida{
 
         self.enfrentamiento(primerZona)
         const sobrevivientes = primerZona.jugadores()
-        const pasan = sobrevivientes.filter{sobreviviente => not sobreviviente.tienePersonalidad(Camper) && not sobreviviente.tienePersonalidad(Arriesgado)}
+        const pasan = sobrevivientes.filter{sobreviviente => not sobreviviente.tienePersonalidad(camper) && not sobreviviente.tienePersonalidad(Arriesgado)}
         siguenteZona.sobreviven(pasan)
         const arriesgados = sobrevivientes.filter{sobreviviente => sobreviviente.tienePersonalidad(Arriesgado)}
         avanzarDosZonas.sobreviven(arriesgados)
         primerZona.cerrarZona()
     }
 
-    method laManoDeDios(zona) = zona.darBotiquin()
+    method laManoDeDios(zona) = zona.tieneSkin()
 
-    method recienArranca() = mapa.any{zona => not zona.estaCerrada()}
+    method recienArranca() = mapa.all{zona => not zona.estaCerrada()}
 
     method todosLosJugadores() = mapa.map { zona => zona.jugadores() }.flatten()
 
@@ -212,7 +209,11 @@ class Zona{
     jugadores = jugadores.union(set)
 }
 
-    method darBotiquin(){
-        jugadores.forEach{jugador => jugador.conseguirItem(botiquin)}
+    method tieneSkin() = jugadores.forEach{jugador => self.darBotiquin(self)}
+
+    method darBotiquin(jugador){
+        if(jugador.tieneSkin("Maradona")){
+            jugador.conseguirItem(botiquin)
+        }
     }
 }

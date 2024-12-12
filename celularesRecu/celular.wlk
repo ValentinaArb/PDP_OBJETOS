@@ -98,11 +98,11 @@ class Compania{
 
 const companiaNacional = new Compania ()
 
-class CompaniaExtranjera inherits Compania{
+/* class CompaniaExtranjera inherits Compania{
   override method monto(derechoAutor){
-    return super() + montoCompaniaExtranjera.valor()
+    return super(monto) + montoCompaniaExtranjera.valor()
   }  
-}
+} */
 
 
 class Contenido {
