@@ -62,6 +62,8 @@ class Periodista {
     const fechaIngreso
     var contadorNoPreferidas = 0
     var noticiasPublicadas = #{}
+    var preferencia
+
     const hoy = new Date()
 
     method preferencia(noticia)
@@ -106,18 +108,18 @@ class Diario{
     }
 }
 
-class Vago inherits Periodista {
-    override method preferencia(noticia) = noticia.esVaga()
+class Vago{
+    method preferencia(noticia) = noticia.esVaga()
 }
 
-class Copado inherits Periodista {
-    override method preferencia(noticia) = noticia.esCopada()
+object Copado{
+    method preferencia(noticia) = noticia.esCopada()
 }
 
-class Sensacionalista inherits Periodista {
-    override method preferencia(noticia) = noticia.esSensacioanlista()
+object Sensacionalista{
+    method preferencia(noticia) = noticia.esSensacioanlista()
 }
 
-object joseDeZer inherits Periodista(fechaIngreso = new Date ()){
-    override method preferencia(noticia) = noticia.comienzaCon("T")
+object joseDeZer{
+    method preferencia(noticia) = noticia.comienzaCon("T")
 }
