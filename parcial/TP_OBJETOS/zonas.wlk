@@ -6,7 +6,6 @@ class Zona{
     method requerimientoItem(cantidadItem,itemBuscado,guerreros) = true 
 }
 
-
 object belfalas inherits Zona{    
     override method puedeAtravesar(guerreros) = true
 }
