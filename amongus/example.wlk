@@ -125,5 +125,9 @@ object nave{
         if(nivelOxigeno == 0){
             throw new Exception(message = "Ganaron los impostores")
     }
+
+    method comenzarVotacion(){
+        
+    }
   }
 }
