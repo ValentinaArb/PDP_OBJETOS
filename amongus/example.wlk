@@ -1,133 +1,231 @@
-class Jugador{
-    const color
-    const mochila = []
-    const tareas = []
-    var nivelSospecha = 40
-    var puedeVotar = true
+class Jugador {
+  var estaVivo = true
+  var puedoVotar = true
+  var nivelSospecha = 40
+  var personalidad
 
-    method esTripulante()
-    
-    method esSospechoso() = nivelSospecha > 50
+  const mochila = []
 
-    method usar(item) = mochila.remove(item)
+  method nivelSospecha() = nivelSospecha
 
-    method buscar(item) = mochila.add(item)
+  method esSospechoso() = nivelSospecha > 50
 
-    method realizarTarea(tarea,nave)
+  method buscarItem(unItem) {
+    mochila.add(unItem)
+  }
 
-    method pedirRealizarTarea(nave){
-        const puedeRealizar = tareas.filter{tarea => tarea.requerimiento()}
-        self.realizarTarea(puedeRealizar.anyOne(),nave)
-    }
+  method aumentarSospecha(unaCantidad) {
+    nivelSospecha += unaCantidad
+  }
 
-    method informarANave(nave) = nave.chequear() 
+  method disminuirSospecha(unaCantidad) {
+    nivelSospecha -= unaCantidad
+  }
 
-    method tiene(item) = mochila.contains(item)
+  method tiene(unItem) = mochila.contains(unItem)
 
-    method modificarNivelSospecha(cantidad){
-        nivelSospecha = nivelSospecha + cantidad
-    }
+  method tieneItems() = !mochila.isEmpty()
 
-    method votoEnBlanco(){
-        puedeVotar = false
-    }
+  method usar(unItem) {
+    mochila.remove(unItem)
+  }
 
-    method completoTareas()
+  method impugnarVoto() {
+    puedoVotar = false
+  }
+
+  method llamarReunionDeEmergencia() {
+    nave.llamarReunionDeEmergencia()
+  }
+
+  method estaVivo() = estaVivo
 }
 
-class Tripulante inherits Jugador{
-    override method esTripulante() = true
-    override method completoTareas() = tareas.isEmpty()
+class Tripulante inherits Jugador {
+  const tareas = []
 
-    override method realizarTarea(tarea,nave){
-        if(tarea.requerimiento()){
-            tarea.consecuencia()
-            tareas.remove(tarea)
-            self.informarANave(nave)
-        }
-    }
+  method completoSusTareas() = tareas.isEmpty()
+
+  method realizarTarea() {
+    const tarea = self.tareaPendienteHacible()
+    tarea.realizatePor(self)
+    tareas.remove(tarea)
+    nave.terminarTarea()
+  }
+
+  method tareaPendienteHacible() = tareas.find { tarea => tarea.puedeRealizarla(self) }
+
+  method voto() = if (puedoVotar) {
+    personalidad.voto()
+  } else {
+    self.votarEnBlanco()
+  }
+
+  method votarEnBlanco() {
+    puedoVotar = true
+    return votoEnBlanco  // EL CASO PROHIBIDO
+  }
+
+  method expulsar() {
+    estaVivo = false
+    nave.expulsarTripulante()
+  }
 }
 
-class Impostor inherits Jugador{
-    override method esTripulante() = false
-    override method completoTareas() = true
+class Impostor inherits Jugador {
+  method completoSusTareas() = true
 
-    override method realizarTarea(tarea,nave){
-        //No se realiza ninguna tarea
-    }
+  method realizarTarea() {
+    // No hace nada
+  }
 
-    method realizarSabotaje(sabotaje,jugador,nave){
-        sabotaje.consecuencia(jugador,nave)
-    }
+  method realizarSabotaje(unSabotaje) {
+    self.aumentarSospecha(5)
+    unSabotaje.realizate()
+  }
+
+  method voto() = nave.cualquierJugadorVivo()
+
+  method expulsar() {
+    estaVivo = false
+    nave.expulsarImpostor()
+  }
 }
 
-class Sabotaje{
-    method consecuencia(jugador, nave)
+class Tarea {
+  const itemsNecesarios
+
+  method puedeRealizarla(unJugador) =
+    itemsNecesarios.all { item => unJugador.tiene(item) }
+
+  method realizatePor(unJugador) {
+    self.afectarA(unJugador)
+    self.usarItemsNecesarios(unJugador)
+  }
+
+  method usarItemsNecesarios(unJugador) {
+    itemsNecesarios.forEach { item => unJugador.usar(item) }
+  }
+
+  method afectarA(unJugador)
 }
 
-object reducirOxigeno inherits Sabotaje{
-    override method consecuencia(jugador,nave){
-        if(!nave.tripulanteTieneTuboDeOxigeno()){
-            nave.modificarNivelOxigeno(-10)
-            nave.verificarOxigeno()
-        }
-    }
+class ArreglarTablero inherits Tarea(itemsNecesarios = ["llave inglesa"]) {
+  override method afectarA(unJugador) {
+    unJugador.aumentarSospecha(10)
+  }
 }
 
-object impugnarVoto inherits Sabotaje{
-    override method consecuencia(jugador,nave){
-        jugador.votoEnBlanco()
-    }
+object sacarBasura inherits Tarea(itemsNecesarios = ["escoba", "bolsa consorcio"]){
+  override method afectarA(unJugador) {
+    unJugador.disminuirSospecha(4)
+  }
 }
 
-class Tarea{
-    method requerimiento(jugador) = true
-    method consecuencia(jugador, nave)
+object ventilarNave inherits Tarea(itemsNecesarios = []) {
+  override method afectarA(unJugador) {
+    nave.aumentarOxigeno(5)
+  }
 }
 
-object arreglarTablero inherits Tarea{
-    override method requerimiento(jugador) = jugador.tiene("llaveInglesa")
-    override method consecuencia(jugador,nave) = jugador.modificarNivelSospecha(10)
+object nave {
+  var nivelOxigeno = 100
+  var cantidadImpostores = 0
+  var cantidadTripulantes = 0
+
+  const jugadores = []
+
+  method aumentarOxigeno(unaCantidad) {
+    nivelOxigeno += unaCantidad
+  }
+
+  method terminarTarea() {
+    if (self.seCompletaronTodasLasTareas()) {
+      throw new DomainException(message = "Ganaron los tripulantes")
+    }
+  }
+
+  method seCompletaronTodasLasTareas() =
+    jugadores.all { jugador => jugador.completoSusTareas() }
+
+  method alguienTieneTuboDeOxigeno() =
+    jugadores.any { jugador => jugador.tiene("tubo de oxigeno") }
+
+  method reducirOxigeno(unaCantidad) {
+    nivelOxigeno -= unaCantidad
+    self.validarGanaronImpostores()
+  }
+
+  method validarGanaronImpostores() {
+    if (nivelOxigeno <= 0 or cantidadImpostores == cantidadTripulantes) {
+      throw new DomainException(message = "Ganaron los impostores")
+    }
+  }
+
+  method llamarReunionDeEmergencia() {
+    const losVotitos = self.jugadoresVivos().map { jugador => jugador.voto() }
+    const elMasVotado = losVotitos.max { alguien => losVotitos.occurrencesOf(alguien) }
+    elMasVotado.expulsar()
+  }
+
+  method jugadoresVivos() =
+    jugadores.filter { jugador => jugador.estaVivo() }
+
+  method jugadorNoSospechoso() =
+    self.jugadoresVivos().findOrDefault({ jugador => !jugador.esSospechoso() }, votoEnBlanco)
+
+  method jugadorSinItems() =
+    self.jugadoresVivos().findOrDefault({ jugador => !jugador.tieneItems() }, votoEnBlanco)
+
+  method jugadorMasSospechoso() =
+    self.jugadoresVivos().max { jugador => jugador.nivelSospecha() }
+
+  method cualquierJugadorVivo() = self.jugadoresVivos().anyOne()
+
+  method expulsarTripulante() {
+    cantidadTripulantes -= 1
+    self.validarGanaronImpostores()
+  }
+
+  method expulsarImpostor() {
+    cantidadImpostores -= 1
+    if (cantidadImpostores == 0) {
+      throw new DomainException(message = "Ganaron los tripulantes")
+    }
+  }
 }
 
-object sacarBasura inherits Tarea{
-    override method requerimiento(jugador) = jugador.tiene("escoba") && jugador.tiene("bolsaDeConsorcio")
-    override method consecuencia(jugador,nave) = jugador.modificarNivelSospecha(-4)
+object reducirOxigeno {
+  method realizate() {
+    if (!nave.alguienTieneTuboDeOxigeno()) {
+      nave.reducirOxigeno(10)
+    }
+  }
 }
 
-object ventilarNave inherits Tarea{
-    override method consecuencia(jugador,nave) = nave.modificarNivelOxigeno(5)
+class ImpugnarJugador {
+  const jugadorImpugnado
+
+  method realizate() {
+    jugadorImpugnado.impugnarVoto()
+  }
 }
 
-object nave{
-    const jugadores = #{}
-    const cantidadImpostores = 0
-    const cantidadTripulantes = 0
-    var nivelOxigeno = 50
-    const tripulantes = jugadores.filter{jugador => jugador.esTripulante()}
 
-    method modificarNivelOxigeno(cantidad){
-        nivelOxigeno = nivelOxigeno + cantidad
-    }
-    
-    method chequear(){        
-        const ganaron = tripulantes.forall{tripulante => tripulante.completoTareas()}
-        if(ganaron){
-            throw new Exception(message = "Ganaron los tripulantes")
-        }
-    }
+object troll {
+  method voto() = nave.jugadorNoSospechoso()
+}
 
-    method tripulanteTieneTuboDeOxigeno(){
-        tripulantes.any{tripulante => tripulante.tiene("Tubo de Oxigeno")}
-    }
+object materialista {
+  method voto() = nave.jugadorSinItems()
+}
 
-    method verificarOxigeno(){
-        if(nivelOxigeno == 0){
-            throw new Exception(message = "Ganaron los impostores")
-    }
+object detective {
+  method voto() = nave.jugadorMasSospechoso()
+}
 
-    method comenzarVotacion(){
-        
-    }
+object votoEnBlanco {
+  method expulsar() {
+    // No hace nada
   }
 }
